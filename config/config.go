@@ -9,16 +9,16 @@ import (
 type Config struct {
 	Name      string `yaml:"name"`
 	Database  Database
-	Server    Server `yaml:"server-driver"`
+	Server    Server `yaml:"server-invite"`
 	Cloud     Cloud
 	Cache     Cache
 	Messaging Messaging
 }
 
 type Server struct {
-	Host   string `yaml:"host-vtx-driver"`
-	Port   int    `yaml:"port-vtx-driver"`
-	Secret string `yaml:"string-vtx-driver"`
+	Host   string `yaml:"host-vtx-invite"`
+	Port   int    `yaml:"port-vtx-invite"`
+	Secret string `yaml:"string-vtx-invite"`
 }
 
 type Database struct {
