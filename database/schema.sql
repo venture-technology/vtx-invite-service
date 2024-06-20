@@ -8,6 +8,4 @@ CREATE TABLE IF NOT EXISTS invites (
     driver VARCHAR(100) NOT NULL, --name_driver
     email_driver VARCHAR(100) NOT NULL,
     status TEXT NOT NULL,
-    FOREIGN KEY (requester) REFERENCES schools(cnpj),
-    FOREIGN KEY (guest) REFERENCES drivers(cnh)
 );
