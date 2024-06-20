@@ -19,8 +19,8 @@ func NewInviteService(repo repository.IInviteRepository, kafkarepo repository.IK
 	}
 }
 
-func (i *InviteService) CreateInvite(ctx context.Context, invite *models.Invite) error {
-	return i.inviterepository.CreateInvite(ctx, invite)
+func (i *InviteService) InviteDriver(ctx context.Context, invite *models.Invite) error {
+	return i.inviterepository.InviteDriver(ctx, invite)
 }
 
 func (i *InviteService) ReadInvite(ctx context.Context, invite_id *int) (*models.Invite, error) {
@@ -40,5 +40,6 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 }
 
 func (i *InviteService) IsEmployee(ctx context.Context, cnh *string) error {
-	return i.inviterepository.IsEmployee(ctx, cnh)
+	// Bater no microserviço de driver ou accountmanager e verificar se o motorista tem ou não vinculo com a escola.
+	return nil
 }
