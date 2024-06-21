@@ -2,7 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"net/http"
 
+	"github.com/venture-technology/vtx-invites/config"
 	"github.com/venture-technology/vtx-invites/internal/repository"
 	"github.com/venture-technology/vtx-invites/models"
 )
@@ -39,7 +43,41 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 	return i.inviterepository.DeclineInvite(ctx, invite_id)
 }
 
-func (i *InviteService) IsEmployee(ctx context.Context, cnh *string) error {
-	// Bater no microserviço de driver ou accountmanager e verificar se o motorista tem ou não vinculo com a escola.
+// Request in AccountManager to verify if school have the driver like employee. If they are partners, Employee is true, otherwise false.
+func (i *InviteService) IsEmployee(ctx context.Context, cnh *string) bool {
+
+	// This is a mock, at now.
+	return false
+
+}
+
+// Validating both as a school and as a driver exist.
+func CheckInviteEntities(invite *models.Invite) error {
+
+	conf := config.Get()
+
+	resp, err := http.Get(fmt.Sprintf("%s/%s", conf.Environment.School, invite.School.Name))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Print(resp.StatusCode)
+		return fmt.Errorf("school is different")
+	}
+
+	resp, err = http.Get(fmt.Sprintf("%s/%s", conf.Environment.Driver, invite.Driver.Name))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Print(resp.StatusCode)
+		return fmt.Errorf("driver is different")
+	}
+
 	return nil
+
 }

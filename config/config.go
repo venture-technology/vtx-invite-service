@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
-	Name      string `yaml:"name"`
-	Database  Database
-	Server    Server `yaml:"server-invite"`
-	Cloud     Cloud
-	Cache     Cache
-	Messaging Messaging
+	Name        string `yaml:"name"`
+	Database    Database
+	Server      Server `yaml:"server-invite"`
+	Cloud       Cloud
+	Cache       Cache
+	Messaging   Messaging
+	Environment Environment
 }
 
 type Server struct {
@@ -48,6 +49,11 @@ type Messaging struct {
 	Brokers   string `yaml:"broker"`
 	Topic     string `yaml:"topic"`
 	Partition int    `yaml:"partition"`
+}
+
+type Environment struct {
+	School string `yaml:"urlschool"`
+	Driver string `yaml:"urldriver"`
 }
 
 var config *Config
