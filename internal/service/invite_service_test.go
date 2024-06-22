@@ -68,7 +68,7 @@ func TestReadInvite(t *testing.T) {
 
 }
 
-func TestReadAllInvites(t *testing.T) {
+func TestFindAllInvitesDriverAccount(t *testing.T) {
 
 }
 

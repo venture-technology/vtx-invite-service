@@ -31,8 +31,9 @@ func (i *InviteService) ReadInvite(ctx context.Context, invite_id *int) (*models
 	return i.inviterepository.ReadInvite(ctx, invite_id)
 }
 
-func (i *InviteService) ReadAllInvites(ctx context.Context, cnh *string) ([]models.Invite, error) {
-	return i.inviterepository.ReadAllInvites(ctx, cnh)
+// find all invites of driver account
+func (i *InviteService) FindAllInvitesDriverAccount(ctx context.Context, cnh *string) ([]models.Invite, error) {
+	return i.inviterepository.FindAllInvitesDriverAccount(ctx, cnh)
 }
 
 func (i *InviteService) AcceptedInvite(ctx context.Context, invite_id *int) error {
@@ -46,7 +47,7 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 // Request in AccountManager to verify if school have the driver like employee. If they are partners, Employee is true, otherwise false.
 func (i *InviteService) IsEmployee(ctx context.Context, cnh *string) bool {
 
-	// This is a mock, at now.
+	// This is a mock, at moment.
 	return false
 
 }
