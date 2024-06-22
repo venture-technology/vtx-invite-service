@@ -10,7 +10,7 @@ import (
 type IInviteRepository interface {
 	InviteDriver(ctx context.Context, invite *models.Invite) error
 	ReadInvite(ctx context.Context, invite_id *int) (*models.Invite, error)
-	ReadAllInvites(ctx context.Context, cnh *string) ([]models.Invite, error)
+	FindAllInvitesDriverAccount(ctx context.Context, cnh *string) ([]models.Invite, error)
 	AcceptedInvite(ctx context.Context, invite_id *int) error
 	DeclineInvite(ctx context.Context, invite_id *int) error
 }
@@ -50,7 +50,7 @@ func (i *InviteRepository) ReadInvite(ctx context.Context, invite_id *int) (*mod
 	return &invite, nil
 }
 
-func (i *InviteRepository) ReadAllInvites(ctx context.Context, cnh *string) ([]models.Invite, error) {
+func (i *InviteRepository) FindAllInvitesDriverAccount(ctx context.Context, cnh *string) ([]models.Invite, error) {
 	sqlQuery := `SELECT invite_id, school, requester, email_school, driver, guest, email_driver, status FROM invites WHERE status = 'pending' AND guest = $1`
 
 	rows, err := i.db.Query(sqlQuery, *cnh)
