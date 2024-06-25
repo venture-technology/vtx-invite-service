@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -45,11 +47,40 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 }
 
 // Request in AccountManager to verify if school have the driver like employee. If they are partners, Employee is true, otherwise false.
-func (i *InviteService) IsEmployee(ctx context.Context, cnh *string) bool {
+func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) error {
 
 	// This is a mock, at moment.
-	return false
+	conf := config.Get()
 
+	resp, err := http.Get(fmt.Sprintf("%s/driver/%s?school=%s", conf.Environment.AccountManager, invite.Driver.CNH, invite.School.CNPJ))
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var response models.Response
+	if err := json.Unmarshal(body, &response); err != nil {
+		return fmt.Errorf("erro ao decodificar o JSON: %v", err.Error())
+	}
+
+	err = processPayout(response.Payout)
+	if err != nil {
+		return fmt.Errorf("erro: %v", err)
+	}
+
+	return nil
+
+}
+
+// create partner between school and driver, then driver accepted invite
+func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite) error {
+	return nil
 }
 
 // Validating both as a school and as a driver exist.
@@ -57,7 +88,7 @@ func CheckInviteEntities(invite *models.Invite) error {
 
 	conf := config.Get()
 
-	resp, err := http.Get(fmt.Sprintf("%s/%s", conf.Environment.School, invite.School.Name))
+	resp, err := http.Get(fmt.Sprintf("%s/%s", conf.Environment.AccountManager, invite.School.Name))
 	if err != nil {
 		return err
 	}
@@ -68,7 +99,7 @@ func CheckInviteEntities(invite *models.Invite) error {
 		return fmt.Errorf("school is different")
 	}
 
-	resp, err = http.Get(fmt.Sprintf("%s/%s", conf.Environment.Driver, invite.Driver.Name))
+	resp, err = http.Get(fmt.Sprintf("%s/%s", conf.Environment.AccountManager, invite.Driver.Name))
 	if err != nil {
 		return err
 	}
@@ -80,5 +111,19 @@ func CheckInviteEntities(invite *models.Invite) error {
 	}
 
 	return nil
+
+}
+
+func processPayout(payout *models.Payout) error {
+
+	if payout == nil {
+		return nil
+	}
+
+	if payout.Driver != nil && payout.School != nil {
+		return fmt.Errorf("school and driver are partners")
+	}
+
+	return fmt.Errorf("error to check processPayout")
 
 }
