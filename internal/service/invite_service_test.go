@@ -1,13 +1,17 @@
 package service
 
 import (
+	"context"
 	"database/sql"
+	"log"
 	"testing"
 
 	"github.com/segmentio/kafka-go"
 	"github.com/venture-technology/vtx-invites/config"
 	"github.com/venture-technology/vtx-invites/internal/repository"
 	"github.com/venture-technology/vtx-invites/models"
+
+	_ "github.com/lib/pq"
 )
 
 func setupTestDb(t *testing.T) (*sql.DB, *InviteService) {
@@ -81,5 +85,17 @@ func TestDeclineInvite(t *testing.T) {
 }
 
 func TestIsEmployee(t *testing.T) {
+
+	_, inviteService := setupTestDb(t)
+
+	inviteMock := models.Invite{
+		School: *mockSchool(),
+		Driver: *mockDriver(),
+		Status: "pending",
+	}
+
+	err := inviteService.IsEmployee(context.Background(), &inviteMock)
+
+	log.Print(err)
 
 }
