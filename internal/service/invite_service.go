@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/venture-technology/vtx-invites/config"
@@ -44,17 +45,23 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 }
 
 // Request in AccountManager to verify if school have the driver like employee. If they are partners, Employee is true, otherwise false.
-func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) error {
+func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) (bool, error) {
 
 	conf := config.Get()
 
-	resp, _ := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
+	resp, err := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
 
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("request error: %d", resp.StatusCode)
+	if err != nil {
+		log.Printf("request error: %s", err.Error())
+		return false, err
 	}
 
-	return nil
+	if resp.StatusCode == 200 {
+		log.Printf("request error: %d", resp.StatusCode)
+		return true, nil
+	}
+
+	return false, nil
 
 }
 
