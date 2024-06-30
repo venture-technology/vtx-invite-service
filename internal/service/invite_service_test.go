@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"log"
 	"testing"
 
 	"github.com/segmentio/kafka-go"
@@ -96,6 +95,44 @@ func TestIsEmployee(t *testing.T) {
 
 	err := inviteService.IsEmployee(context.Background(), &inviteMock)
 
-	log.Print(err)
+	if err != nil {
+		t.Errorf("%v", err.Error())
+	}
+
+}
+
+func TestCheckInviteEntities(t *testing.T) {
+
+	_, inviteService := setupTestDb(t)
+
+	inviteMock := models.Invite{
+		School: *mockSchool(),
+		Driver: *mockDriver(),
+		Status: "pending",
+	}
+
+	err := inviteService.CheckInviteEntities(context.Background(), &inviteMock)
+
+	if err != nil {
+		t.Errorf("%v", err.Error())
+	}
+
+}
+
+func TestCreatePartnet(t *testing.T) {
+
+	_, inviteService := setupTestDb(t)
+
+	inviteMock := models.Invite{
+		School: *mockSchool(),
+		Driver: *mockDriver(),
+		Status: "pending",
+	}
+
+	err := inviteService.CreatePartner(context.Background(), &inviteMock)
+
+	if err != nil {
+		t.Errorf("%v", err.Error())
+	}
 
 }
