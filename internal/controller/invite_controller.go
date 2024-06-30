@@ -37,7 +37,6 @@ func (ct *InviteController) Ping(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "pong",
 	})
-	return
 }
 
 func (ct *InviteController) CreateInvite(c *gin.Context) {
@@ -50,13 +49,29 @@ func (ct *InviteController) CreateInvite(c *gin.Context) {
 		return
 	}
 
-	if employee := ct.inviteservice.IsEmployee(c, &input.Driver.CNH); employee == true {
-		log.Printf("school and driver are partners, result: %v", employee)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "school and driver are partners"})
+	err := ct.inviteservice.CheckInviteEntities(c, &input)
+
+	if err != nil {
+		log.Printf("some entities dont exist: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"message": "internal server error"})
 		return
 	}
 
-	err := ct.inviteservice.InviteDriver(c, &input)
+	employee, err := ct.inviteservice.IsEmployee(c, &input)
+
+	if err != nil {
+		log.Printf("error while verify employee: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"message": "internal server error"})
+		return
+	}
+
+	if employee {
+		log.Printf("employee is true: %v", employee)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "internal server error"})
+		return
+	}
+
+	err = ct.inviteservice.InviteDriver(c, &input)
 
 	if err != nil {
 		log.Printf("error while creating invite: %s", err.Error())
@@ -65,7 +80,6 @@ func (ct *InviteController) CreateInvite(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, &input)
-	return
 
 }
 
