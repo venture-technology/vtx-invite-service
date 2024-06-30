@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/venture-technology/vtx-invites/config"
@@ -47,7 +46,20 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 // Request in AccountManager to verify if school have the driver like employee. If they are partners, Employee is true, otherwise false.
 func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) error {
 
-	// Add interpolate, with accountmangerurl + driver + school
+	conf := config.Get()
+
+	resp, _ := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("request error: %d", resp.StatusCode)
+	}
+
+	return nil
+
+}
+
+// create partner between school and driver, then driver accepted invite, sending request to account manager
+func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite) error {
 
 	conf := config.Get()
 
@@ -61,36 +73,21 @@ func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) e
 
 }
 
-// create partner between school and driver, then driver accepted invite
-func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite) error {
-	return nil
-}
-
 // Validating both as a school and as a driver exist.
-func CheckInviteEntities(invite *models.Invite) error {
+func (i *InviteService) CheckInviteEntities(ctx context.Context, invite *models.Invite) error {
 
 	conf := config.Get()
 
-	// Add interpolate = schoolurl + schoolcnpj
-	resp, err := http.Get(fmt.Sprintf("%s/%s", conf.Environment.School, invite.School.CNPJ))
-	if err != nil {
-		return err
-	}
+	resp, _ := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("request error in school: %d", resp.StatusCode)
+		return fmt.Errorf("request error: %d", resp.StatusCode)
 	}
 
-	// Add interpolate = schoolurl + schoolcnpj
-	resp, err = http.Get(fmt.Sprintf("%s/%s", conf.Environment.Driver, invite.Driver.CNH))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	resp, _ = http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
 
-	if resp.StatusCode != http.StatusOK {
-		log.Print(resp.StatusCode)
-		return fmt.Errorf("driver is different")
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("request error: %d", resp.StatusCode)
 	}
 
 	return nil
