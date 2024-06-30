@@ -93,10 +93,10 @@ func TestIsEmployee(t *testing.T) {
 		Status: "pending",
 	}
 
-	err := inviteService.IsEmployee(context.Background(), &inviteMock)
+	_, err := inviteService.IsEmployee(context.Background(), &inviteMock)
 
 	if err != nil {
-		t.Errorf("%v", err.Error())
+		t.Errorf("error to send request: %v", err.Error())
 	}
 
 }
