@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -168,5 +169,25 @@ func (ct *InviteController) AcceptedInvite(c *gin.Context) {
 }
 
 func (ct *InviteController) DeclineInvite(c *gin.Context) {
+
+	idStr := c.Param("id")
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		log.Printf("error while convert string to int: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error at convert to int"})
+		return
+	}
+
+	err = ct.inviteservice.DeclineInvite(c, &id)
+
+	if err != nil {
+		log.Printf("error while deleting invite: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error at deleting invite"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("invite deleted w/ successfully: %d", &id)})
 
 }
