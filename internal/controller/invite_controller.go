@@ -128,6 +128,43 @@ func (ct *InviteController) FindAllInvitesDriverAccount(c *gin.Context) {
 
 func (ct *InviteController) AcceptedInvite(c *gin.Context) {
 
+	idStr := c.Param("id")
+
+	id, err := strconv.Atoi(idStr)
+
+	if err != nil {
+		log.Printf("error while convert string to int: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error at convert to int"})
+		return
+	}
+
+	// read invite to get data of invite and create a partners between school and driver
+	invite, err := ct.inviteservice.ReadInvite(c, &id)
+
+	if err != nil {
+		log.Printf("error while reading invite: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error at reading invite"})
+		return
+	}
+
+	err = ct.inviteservice.AcceptedInvite(c, &id)
+
+	if err != nil {
+		log.Printf("error while accepting invite: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error at accepting invite"})
+		return
+	}
+
+	err = ct.inviteservice.CreatePartner(c, invite)
+
+	if err != nil {
+		log.Printf("error while creating partner: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": "internal server error at creating partner"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, invite)
+
 }
 
 func (ct *InviteController) DeclineInvite(c *gin.Context) {
