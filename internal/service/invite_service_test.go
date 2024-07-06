@@ -101,24 +101,6 @@ func TestIsEmployee(t *testing.T) {
 
 }
 
-func TestCheckInviteEntities(t *testing.T) {
-
-	_, inviteService := setupTestDb(t)
-
-	inviteMock := models.Invite{
-		School: *mockSchool(),
-		Driver: *mockDriver(),
-		Status: "pending",
-	}
-
-	err := inviteService.CheckInviteEntities(context.Background(), &inviteMock)
-
-	if err != nil {
-		t.Errorf("%v", err.Error())
-	}
-
-}
-
 func TestCreatePartnet(t *testing.T) {
 
 	_, inviteService := setupTestDb(t)

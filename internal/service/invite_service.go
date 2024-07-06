@@ -79,24 +79,3 @@ func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite
 	return nil
 
 }
-
-// Validating both as a school and as a driver exist.
-func (i *InviteService) CheckInviteEntities(ctx context.Context, invite *models.Invite) error {
-
-	conf := config.Get()
-
-	resp, _ := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("request error: %d", resp.StatusCode)
-	}
-
-	resp, _ = http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("request error: %d", resp.StatusCode)
-	}
-
-	return nil
-
-}

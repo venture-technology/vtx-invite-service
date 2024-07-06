@@ -50,14 +50,6 @@ func (ct *InviteController) CreateInvite(c *gin.Context) {
 		return
 	}
 
-	err := ct.inviteservice.CheckInviteEntities(c, &input)
-
-	if err != nil {
-		log.Printf("some entities dont exist: %s", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"message": "internal server error"})
-		return
-	}
-
 	employee, err := ct.inviteservice.IsEmployee(c, &input)
 
 	if err != nil {
