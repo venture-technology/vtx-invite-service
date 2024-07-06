@@ -72,7 +72,7 @@ func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite
 
 	resp, _ := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 201 {
 		return fmt.Errorf("request error: %d", resp.StatusCode)
 	}
 
