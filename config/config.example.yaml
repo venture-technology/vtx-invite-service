@@ -1,0 +1,29 @@
+name: vtx-invite-service
+development: true
+
+server-invite:
+  host-vtx-invite: "localhost"
+  port-vtx-invite: 8877
+  secret-vtx-invite: "venture"
+
+database:
+  dbuser: "postgres"
+  dbport: 5432
+  dbhost: "iphost"
+  dbpassword: "bdpassword"
+  dbname: "venture_staging"
+  schema: "database/schema.sql"
+
+cloud:
+  region: "us-east-1"
+  accesskey: "accesskey"
+  secretkey: "secretkey"
+  token: ""
+  source: "emailsource"
+
+messaging:
+  broker: "brokerip"
+  topic: "topicname"
+
+environment:
+  accountmanagerurl: "accountmanagerurl/driver" 
