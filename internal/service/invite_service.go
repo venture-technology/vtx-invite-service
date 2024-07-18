@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -31,13 +33,19 @@ func (i *InviteService) ReadInvite(ctx context.Context, invite_id *int) (*models
 	return i.inviterepository.ReadInvite(ctx, invite_id)
 }
 
-// find all invites of driver account
 func (i *InviteService) FindAllInvitesDriverAccount(ctx context.Context, cnh *string) ([]models.Invite, error) {
 	return i.inviterepository.FindAllInvitesDriverAccount(ctx, cnh)
 }
 
-func (i *InviteService) AcceptedInvite(ctx context.Context, invite_id *int) error {
-	return i.inviterepository.AcceptedInvite(ctx, invite_id)
+func (i *InviteService) AcceptedInvite(ctx context.Context, invite *models.Invite) error {
+
+	err := i.CreatePartner(ctx, invite)
+
+	if err != nil {
+		return err
+	}
+
+	return i.inviterepository.AcceptedInvite(ctx, &invite.ID)
 }
 
 func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error {
@@ -49,7 +57,7 @@ func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) (
 
 	conf := config.Get()
 
-	resp, err := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
+	resp, err := http.Get(fmt.Sprintf("%s/%s?school=%s", conf.Environment.AccountManager, invite.Driver.CNH, invite.School.CNPJ))
 
 	if err != nil {
 		log.Printf("request error: %s", err.Error())
@@ -57,7 +65,7 @@ func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) (
 	}
 
 	if resp.StatusCode == 200 {
-		log.Printf("request error: %d", resp.StatusCode)
+		log.Printf("they are employers: %d", resp.StatusCode)
 		return true, nil
 	}
 
@@ -70,11 +78,22 @@ func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite
 
 	conf := config.Get()
 
-	resp, _ := http.Get(fmt.Sprintf("%v", conf.Environment.AccountManager))
+	jsonInvite, err := json.Marshal(invite)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.Post(fmt.Sprintf("%s/partner", conf.Environment.AccountManager), "application/json", bytes.NewBuffer(jsonInvite))
+
+	if err != nil {
+		return err
+	}
 
 	if resp.StatusCode != 201 {
 		return fmt.Errorf("request error: %d", resp.StatusCode)
 	}
+	defer resp.Body.Close()
 
 	return nil
 
