@@ -53,6 +53,8 @@ type Messaging struct {
 
 type Environment struct {
 	AccountManager string `yaml:"accountmanagerurl"`
+	Driver         string `yaml:"driverurl"`
+	School         string `yaml:"schoolurl"`
 }
 
 var config *Config

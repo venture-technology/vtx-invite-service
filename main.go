@@ -12,6 +12,8 @@ import (
 	"github.com/venture-technology/vtx-invites/internal/controller"
 	"github.com/venture-technology/vtx-invites/internal/repository"
 	"github.com/venture-technology/vtx-invites/internal/service"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -37,15 +39,11 @@ func main() {
 
 	inviteRepository := repository.NewInviteRepository(db)
 	kafkaRepository := repository.NewKafkaRepository(producer)
-
 	inviteService := service.NewInviteService(inviteRepository, kafkaRepository)
-
 	inviteController := controller.NewInviteController(inviteService)
-
 	inviteController.RegisterRoutes(router)
 
 	log.Printf("initing service: %s", config.Name)
-
 	router.Run(fmt.Sprintf(":%d", config.Server.Port))
 
 }

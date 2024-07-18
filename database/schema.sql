@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS invites (
     guest VARCHAR(14), -- driver
     driver VARCHAR(100) NOT NULL, --name_driver
     email_driver VARCHAR(100) NOT NULL,
-    status TEXT NOT NULL,
+    status TEXT NOT NULL
 );

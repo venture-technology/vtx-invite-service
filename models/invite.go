@@ -1,14 +1,12 @@
 package models
 
 type Driver struct {
-	ID    int    `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	CNH   string `json:"cnh"`
 }
 
 type School struct {
-	ID    int    `json:"id"`
 	Name  string `json:"name"`
 	CNPJ  string `json:"cnpj"`
 	Email string `json:"email"`

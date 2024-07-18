@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"testing"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/venture-technology/vtx-invites/config"
 	"github.com/venture-technology/vtx-invites/internal/repository"
 	"github.com/venture-technology/vtx-invites/models"
+
+	_ "github.com/lib/pq"
 )
 
 func setupTestDb(t *testing.T) (*sql.DB, *InviteService) {
@@ -81,5 +84,37 @@ func TestDeclineInvite(t *testing.T) {
 }
 
 func TestIsEmployee(t *testing.T) {
+
+	_, inviteService := setupTestDb(t)
+
+	inviteMock := models.Invite{
+		School: *mockSchool(),
+		Driver: *mockDriver(),
+		Status: "pending",
+	}
+
+	_, err := inviteService.IsEmployee(context.Background(), &inviteMock)
+
+	if err != nil {
+		t.Errorf("error to send request: %v", err.Error())
+	}
+
+}
+
+func TestCreatePartnet(t *testing.T) {
+
+	_, inviteService := setupTestDb(t)
+
+	inviteMock := models.Invite{
+		School: *mockSchool(),
+		Driver: *mockDriver(),
+		Status: "pending",
+	}
+
+	err := inviteService.CreatePartner(context.Background(), &inviteMock)
+
+	if err != nil {
+		t.Errorf("%v", err.Error())
+	}
 
 }

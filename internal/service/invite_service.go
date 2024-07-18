@@ -1,10 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -33,13 +33,19 @@ func (i *InviteService) ReadInvite(ctx context.Context, invite_id *int) (*models
 	return i.inviterepository.ReadInvite(ctx, invite_id)
 }
 
-// find all invites of driver account
 func (i *InviteService) FindAllInvitesDriverAccount(ctx context.Context, cnh *string) ([]models.Invite, error) {
 	return i.inviterepository.FindAllInvitesDriverAccount(ctx, cnh)
 }
 
-func (i *InviteService) AcceptedInvite(ctx context.Context, invite_id *int) error {
-	return i.inviterepository.AcceptedInvite(ctx, invite_id)
+func (i *InviteService) AcceptedInvite(ctx context.Context, invite *models.Invite) error {
+
+	err := i.CreatePartner(ctx, invite)
+
+	if err != nil {
+		return err
+	}
+
+	return i.inviterepository.AcceptedInvite(ctx, &invite.ID)
 }
 
 func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error {
@@ -47,83 +53,48 @@ func (i *InviteService) DeclineInvite(ctx context.Context, invite_id *int) error
 }
 
 // Request in AccountManager to verify if school have the driver like employee. If they are partners, Employee is true, otherwise false.
-func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) error {
+func (i *InviteService) IsEmployee(ctx context.Context, invite *models.Invite) (bool, error) {
 
-	// This is a mock, at moment.
 	conf := config.Get()
 
-	resp, err := http.Get(fmt.Sprintf("%s/driver/%s?school=%s", conf.Environment.AccountManager, invite.Driver.CNH, invite.School.CNPJ))
+	resp, err := http.Get(fmt.Sprintf("%s/%s?school=%s", conf.Environment.AccountManager, invite.Driver.CNH, invite.School.CNPJ))
 
 	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
+		log.Printf("request error: %s", err.Error())
+		return false, err
 	}
 
-	var response models.Response
-	if err := json.Unmarshal(body, &response); err != nil {
-		return fmt.Errorf("erro ao decodificar o JSON: %v", err.Error())
+	if resp.StatusCode == 200 {
+		log.Printf("they are employers: %d", resp.StatusCode)
+		return true, nil
 	}
 
-	err = processPayout(response.Payout)
-	if err != nil {
-		return fmt.Errorf("erro: %v", err)
-	}
-
-	return nil
+	return false, nil
 
 }
 
-// create partner between school and driver, then driver accepted invite
+// create partner between school and driver, then driver accepted invite, sending request to account manager
 func (i *InviteService) CreatePartner(ctx context.Context, invite *models.Invite) error {
-	return nil
-}
-
-// Validating both as a school and as a driver exist.
-func CheckInviteEntities(invite *models.Invite) error {
 
 	conf := config.Get()
 
-	resp, err := http.Get(fmt.Sprintf("%s/%s", conf.Environment.AccountManager, invite.School.Name))
+	jsonInvite, err := json.Marshal(invite)
+
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		log.Print(resp.StatusCode)
-		return fmt.Errorf("school is different")
-	}
+	resp, err := http.Post(fmt.Sprintf("%s/partner", conf.Environment.AccountManager), "application/json", bytes.NewBuffer(jsonInvite))
 
-	resp, err = http.Get(fmt.Sprintf("%s/%s", conf.Environment.AccountManager, invite.Driver.Name))
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		log.Print(resp.StatusCode)
-		return fmt.Errorf("driver is different")
+	if resp.StatusCode != 201 {
+		return fmt.Errorf("request error: %d", resp.StatusCode)
 	}
+	defer resp.Body.Close()
 
 	return nil
-
-}
-
-func processPayout(payout *models.Payout) error {
-
-	if payout == nil {
-		return nil
-	}
-
-	if payout.Driver != nil && payout.School != nil {
-		return fmt.Errorf("school and driver are partners")
-	}
-
-	return fmt.Errorf("error to check processPayout")
 
 }
